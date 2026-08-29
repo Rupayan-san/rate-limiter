@@ -1,47 +1,66 @@
 class LeakyBucket {
     private capacity: number;
     private leakRate: number;
-    private currentLevel: number;
-    private lastLeakTime: number = Date.now();
+    private buckets = new Map<string, {
+        currentLevel: number;
+        lastLeakTime: number;
+    }>();
+
     constructor(capacity: number, leakRate: number) {
         this.capacity = capacity;
         this.leakRate = leakRate;
-        this.currentLevel = 0;
     }
 
-    addRequest(): boolean {
-        if (this.currentLevel < this.capacity) {
-            this.currentLevel++;
+    getBucket(userId: string) {
+        if (!this.buckets.has(userId)) {
+            this.buckets.set(userId, {
+                currentLevel: 0,
+                lastLeakTime: Date.now(),
+            });
+        }
+        return this.buckets.get(userId);
+    }
+
+    addRequest(userId: string): boolean {
+        const bucket = this.getBucket(userId);
+        if (!bucket) {
+            throw new Error("Bucket could not be created");
+        }
+        if (bucket.currentLevel < this.capacity) {
+            bucket.currentLevel++;
             return true;
         } else {
             return false;
         }
     }
 
-    leakRequests(): void {
+    leakRequests(userId: string): void {
+        const bucket = this.getBucket(userId);
+        if (!bucket) {
+            throw new Error("Bucket could not be created");
+        }
         const now = Date.now();
 
-        const elapsedTime = (now - this.lastLeakTime) / 1000;
+        const elapsedTime = (now - bucket.lastLeakTime) / 1000;
 
         const leakedRequests = Math.floor(
             this.leakRate * elapsedTime
         );
 
         if (leakedRequests > 0) {
-            this.currentLevel -= leakedRequests;
+            bucket.currentLevel -= leakedRequests;
 
-            if (this.currentLevel < 0) {
-                this.currentLevel = 0;
+            if (bucket.currentLevel < 0) {
+                bucket.currentLevel = 0;
             }
 
-            // Only advance time by the amount actually used
-            this.lastLeakTime += (leakedRequests / this.leakRate) * 1000;
+            bucket.lastLeakTime += (leakedRequests / this.leakRate) * 1000;
         }
     }
 
-    allowRequest(): boolean {
-        this.leakRequests();
-        return this.addRequest();
+    allowRequest(userId: string): boolean {
+        this.leakRequests(userId);
+        return this.addRequest(userId);
     }
 
 }

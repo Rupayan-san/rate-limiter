@@ -1,5 +1,3 @@
-
-
 class TokenBucket {
     private capacity: number;
     private refillRate: number;
