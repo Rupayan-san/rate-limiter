@@ -1,29 +1,34 @@
+import { client } from "../../config/redis.config.js";
+
 class TokenBucket {
     private capacity: number;
     private refillRate: number;
-    
-    private buckets = new Map<string, {
-        tokens: number;
-        lastRefillTime: number;
-    }>();
 
     constructor(capacity: number, refillRate: number) {
         this.capacity = capacity;
         this.refillRate = refillRate;
     }
 
-    getBucket(userId: string) {
-        if (!this.buckets.has(userId)) {
-            this.buckets.set(userId, {
+    async getBucket(userId: string) {
+        let data = await client.hGetAll(`user:${userId}`);
+
+        if (Object.keys(data).length === 0) {
+            await client.hSet(`user:${userId}`, {
                 tokens: this.capacity,
                 lastRefillTime: Date.now(),
             });
+
+            data = await client.hGetAll(`user:${userId}`);
         }
-        return this.buckets.get(userId);
+
+        return {
+            tokens: Number(data.tokens),
+            lastRefillTime: Number(data.lastRefillTime),
+        };
     }
 
-    refillTokens(userId: string) {
-        const bucket = this.getBucket(userId);
+    async refillTokens(userId: string) {
+        const bucket = await this.getBucket(userId);
         if (!bucket) {
             throw new Error("Bucket could not be created");
         }
@@ -32,16 +37,25 @@ class TokenBucket {
         const tokensToAdd = elapsedTime * this.refillRate;
         bucket.tokens = Math.min(this.capacity, bucket.tokens + tokensToAdd);
         bucket.lastRefillTime = now;
+        await this.saveBucket(userId, bucket);
     }
 
-    allowRequest(userId: string): boolean {
-        this.refillTokens(userId);
-        const bucket = this.getBucket(userId);
+    async allowRequest(userId: string): Promise<boolean> {
+        await this.refillTokens(userId);
+        const bucket = await this.getBucket(userId);
         if (bucket && bucket.tokens >= 1) {
             bucket.tokens -= 1;
+            await this.saveBucket(userId, bucket);
             return true;
         }
         return false;
+    }
+
+    async saveBucket(userId: string, bucket: {
+        tokens: number;
+        lastRefillTime: number;
+    }) {
+        await client.hSet(`user:${userId}`, bucket);
     }
 }
 
