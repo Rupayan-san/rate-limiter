@@ -18,7 +18,7 @@ export class SlidingWindow {
         }
     }
 
-    addRequest(userId: string): boolean {
+    allowRequest(userId: string): boolean {
         const now = Date.now();
         this.cleanupOldRequests(now, userId);
         const window = this.getWindowTimestamps(userId);
@@ -28,6 +28,7 @@ export class SlidingWindow {
         }
         return false;
     }
+
 
     private cleanupOldRequests(now: number, userId: string): void {
         const windowStart = now - this.windowSize * 1000; // Convert window size to milliseconds
