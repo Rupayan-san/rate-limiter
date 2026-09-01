@@ -9,6 +9,7 @@ describe('LeakyBucket', () => {
     expect(result).toBe(true);
   });
 
+
   it('should reject requests when bucket is full', async () => {
     const bucket = new LeakyBucket(1, 0);
     const userId = `test-${Date.now()}`;
@@ -18,6 +19,7 @@ describe('LeakyBucket', () => {
     const secondRequest = await bucket.allowRequest(userId);
     expect(secondRequest).toBe(false);
   });
+
 
   it('should allow requests after requests leak from the bucket', async () => {
     const bucket = new LeakyBucket(1, 1);
@@ -36,6 +38,7 @@ describe('LeakyBucket', () => {
     expect(thirdRequest).toBe(true);
   });
 
+
   it('should maintain independent buckets for different users', async () => {
     const bucket = new LeakyBucket(1, 1);
     const userId1 = `user1-${Date.now()}`;
@@ -53,6 +56,7 @@ describe('LeakyBucket', () => {
     const secondRequestUser2 = await bucket.allowRequest(userId2);
     expect(secondRequestUser2).toBe(false);
   });
+
 
   it('should not exceed bucket capacity', async () => {
     const bucket = new LeakyBucket(2, 1);
@@ -76,4 +80,22 @@ describe('LeakyBucket', () => {
     const fifthRequest = await bucket.allowRequest(userId);
     expect(fifthRequest).toBe(false);
   });
+
+  
+  it('should not exceed capacity with concurrent requests', async () => {
+    const bucket = new LeakyBucket(5, 0);
+    const userId = `concurrent-${Date.now()}`;
+
+    const results = await Promise.all(
+        Array.from({ length: 20 }, () =>
+            bucket.allowRequest(userId)
+        )
+    );
+
+    const allowedRequests = results.filter(
+        result => result === true
+    );
+
+    expect(allowedRequests.length).toBe(5);
+});
 });

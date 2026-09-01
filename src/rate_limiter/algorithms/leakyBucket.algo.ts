@@ -66,7 +66,7 @@ class LeakyBucket implements RateLimiter {
 
     async runScript(userId: string) {
         const result = await client.eval(this.script, {
-            keys: [`user:${userId}`],
+            keys: [`leaky_bucket:${userId}`],
             arguments: [
                 String(this.capacity),
                 String(this.leakRate),

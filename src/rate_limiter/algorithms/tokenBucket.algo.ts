@@ -6,24 +6,44 @@ class TokenBucket implements RateLimiter {
     private refillRate: number;
     private readonly script = `
         local now = tonumber(ARGV[3])
-        
-        local exists = redis.call("EXISTS", KEYS[1])
-        
-        if exists == 0 then
-            redis.call("HSET", KEYS[1],
-                "tokens", ARGV[1],
-                "lastRefillTime", now
-            )
-        end
-        
-        local tokens = redis.call("HGET", KEYS[1], "tokens")
-        local lastRefillTime = redis.call("HGET", KEYS[1], "lastRefillTime")
-        local elapsedTime = (now - tonumber(lastRefillTime)) / 1000
-        local tokensToAdd = elapsedTime * tonumber(ARGV[2])
+        local capacity = tonumber(ARGV[1])
+        local refillRate = tonumber(ARGV[2])
 
-        local newTokens = math.min(tonumber(ARGV[1]), tonumber(tokens) + tokensToAdd)
-        
+        local tokens = tonumber(
+            redis.call("HGET", KEYS[1], "tokens")
+        )
+
+        local lastRefillTime
+
+        if tokens == nil then
+
+            tokens = capacity
+            lastRefillTime = now
+
+            redis.call("HSET", KEYS[1],
+                "tokens", tokens,
+                "lastRefillTime", lastRefillTime
+            )
+
+        else
+
+            lastRefillTime = tonumber(
+                redis.call("HGET", KEYS[1], "lastRefillTime")
+            )
+
+        end
+
+        local elapsedTime = (now - lastRefillTime) / 1000
+
+        local tokensToAdd = elapsedTime * refillRate
+
+        local newTokens = math.min(
+            capacity,
+            tokens + tokensToAdd
+        )
+
         if newTokens >= 1 then
+
             newTokens = newTokens - 1
 
             redis.call("HSET", KEYS[1],
@@ -32,6 +52,7 @@ class TokenBucket implements RateLimiter {
             )
 
             return 1
+
         end
 
         redis.call("HSET", KEYS[1],
@@ -40,7 +61,6 @@ class TokenBucket implements RateLimiter {
         )
 
         return 0
-
     `;
 
     constructor(capacity: number, refillRate: number) {
@@ -59,7 +79,7 @@ class TokenBucket implements RateLimiter {
 
     async runScript(userId: string) {
         const result = await client.eval(this.script, {
-            keys: [`user:${userId}`],
+            keys: [`token_bucket:${userId}`],
             arguments: [
                 String(this.capacity),
                 String(this.refillRate),
