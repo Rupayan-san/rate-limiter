@@ -1,6 +1,7 @@
 import { client } from "../../config/redis.config.js";
+import type { RateLimiter } from "../rateLimiter.interface.js";
 
-class LeakyBucket {
+class LeakyBucket implements RateLimiter {
     private capacity: number;
     private leakRate: number;
 

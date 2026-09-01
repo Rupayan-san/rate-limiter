@@ -1,7 +1,8 @@
 import type { Request, Response, NextFunction } from 'express';
-import { TokenBucket } from '../rate_limiter/algorithms/tokenBucket.algo.js';
+import type { RateLimiter } from '../rate_limiter/rateLimiter.interface.js';
 
-export const accessBucket = (tokenBucket: TokenBucket) => {
+
+export const rateLimitMiddleware  = (rateLimiter: RateLimiter) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         const userId = req.params.userId as string;
 
@@ -9,7 +10,7 @@ export const accessBucket = (tokenBucket: TokenBucket) => {
             return res.status(400).send('User ID is required');
         }
 
-        if (await tokenBucket.allowRequest(userId)) {
+        if (await rateLimiter.allowRequest(userId)) {
             next();
         } else {
             return res.status(429).send('Rate limit exceeded');

@@ -1,6 +1,7 @@
 import { client } from "../../config/redis.config.js";
+import type { RateLimiter } from "../rateLimiter.interface.js";
 
-class TokenBucket {
+class TokenBucket implements RateLimiter {
     private capacity: number;
     private refillRate: number;
     private readonly script = `
