@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { TokenBucket } from './tokenBucket.algo.js';
+import { TokenBucket } from '../algorithms/tokenBucket.algo.js';
 
 describe('TokenBucket', () => {
   it('should allow requests when tokens are available', async () => {

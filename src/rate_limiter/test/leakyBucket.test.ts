@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { LeakyBucket } from './leakyBucket.algo.js';
+import { LeakyBucket } from '../algorithms/leakyBucket.algo.js';
 
 describe('LeakyBucket', () => {
   it('should allow requests when bucket has capacity', async () => {

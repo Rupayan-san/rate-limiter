@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { SlidingWindow } from './silidingWindow.algo.js';
+import { SlidingWindow } from '../algorithms/silidingWindow.algo.js';
 
 describe('SlidingWindow', () => {
     it('should allow requests when under the limit', async () => {
