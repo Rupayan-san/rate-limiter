@@ -1,0 +1,41 @@
+reference,variation,type,similarity
+"How do I reset my password?","I forgot my password. How can I reset it?","same",0.7801977916543735
+"How do I reset my password?","What are the steps to reset a forgotten password?","same",0.6706973566213881
+"How do I reset my password?","I can't remember my password. How do I create a new one?","same",0.7048815071879876
+"How do I reset my password?","I need to change my forgotten password.","same",0.6170676178612235
+"How do I reset my password?","How do I change my email address?","different",0.5772223156485248
+"How do I reset my password?","How do I delete my account?","different",0.5361484125991866
+"How do I reset my password?","Why can't I log into my account?","different",0.42486218185349545
+"How do I reset my password?","How do I update my profile?","different",0.5097714945873462
+"How can I cancel my subscription?","I want to stop my subscription.","same",0.722807780979195
+"How can I cancel my subscription?","How do I end my subscription?","same",0.8098453062027152
+"How can I cancel my subscription?","I don't want my subscription anymore.","same",0.639361046410547
+"How can I cancel my subscription?","How can I terminate my subscription?","same",0.8785349492976295
+"How can I cancel my subscription?","How do I get a refund?","different",0.502764930977802
+"How can I cancel my subscription?","How do I change my account password?","different",0.38685412708180833
+"How can I cancel my subscription?","How do I update my email address?","different",0.39643696208339635
+"How can I cancel my subscription?","How do I track my order?","different",0.33623783485337266
+"How do I track my order?","Where can I see the status of my order?","same",0.7132761813013254
+"How do I track my order?","How can I check where my package is?","same",0.643384530018256
+"How do I track my order?","Where is my order right now?","same",0.6277269074497387
+"How do I track my order?","Can I track my package?","same",0.7317768511643381
+"How do I track my order?","How do I cancel my order?","different",0.6268557968081998
+"How do I track my order?","How can I change my delivery address?","different",0.49446939556207226
+"How do I track my order?","How long does shipping take?","different",0.40107072097657853
+"How do I track my order?","How do I request a refund?","different",0.43019424996481764
+"How do I change my email address?","I want to update the email on my account.","same",0.6353695198817233
+"How do I change my email address?","How can I change my account email?","same",0.794438267954121
+"How do I change my email address?","Where can I update my email address?","same",0.7591728816340078
+"How do I change my email address?","I need to replace my current email address.","same",0.6865557825223442
+"How do I change my email address?","How do I reset my password?","different",0.5772223156485248
+"How do I change my email address?","How do I delete my account?","different",0.5542242609073199
+"How do I change my email address?","How do I change my username?","different",0.705533824601885
+"How do I change my email address?","Why can't I log into my account?","different",0.33067964075745615
+"How much does this product cost?","What is the price of this product?","same",0.8737499938139709
+"How much does this product cost?","How much is this item?","same",0.6911192982384811
+"How much does this product cost?","What does this product cost?","same",0.9459091048884499
+"How much does this product cost?","Can you tell me the price of this item?","same",0.5792583359862165
+"How much does this product cost?","How do I order this product?","different",0.591881787638511
+"How much does this product cost?","Is this product available?","different",0.5979575515011148
+"How much does this product cost?","How long will delivery take?","different",0.2055110873277632
+"How much does this product cost?","Can I return this product?","different",0.4527268019568552
