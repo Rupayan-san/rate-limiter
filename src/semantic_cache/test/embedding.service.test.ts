@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { describe, it, expect } from "vitest";
-import { EmbeddingService } from "../embedding.service.js";
+import { EmbeddingService } from "../services/embedding.service.js";
 
 describe("EmbeddingService", () => {
     it("should generate an embedding", async () => {

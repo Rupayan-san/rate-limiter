@@ -1,6 +1,6 @@
 import "dotenv/config";
-import { EmbeddingService } from "./embedding.service.js";
-import { cosineSimilarity } from "./similarity.js";
+import { EmbeddingService } from "../services/embedding.service.js";
+import { cosineSimilarity } from "../utils/similarity.js";
 import { writeFileSync, appendFileSync, writeSync } from "fs";
 
 // const testCases = [
