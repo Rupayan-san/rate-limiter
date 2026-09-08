@@ -20,7 +20,9 @@ class EmbeddingService {
             input: text,
         });
 
-        return response.data[0]?.embedding as number[] || [];
+        const embedding = response.data[0]?.embedding as number[] || [];
+        
+        return embedding;
     }
 }
 
