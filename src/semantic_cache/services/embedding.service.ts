@@ -3,8 +3,6 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const openai = new OpenAI();
-
 class EmbeddingService {
     private client: OpenAI;
 
@@ -14,7 +12,7 @@ class EmbeddingService {
         });
     }
 
-    async generateEmbedding(text: string): Promise<number[]> {
+    public async generateEmbedding(text: string): Promise<number[]> {
         const response = await this.client.embeddings.create({
             model: "text-embedding-3-large",
             input: text,
