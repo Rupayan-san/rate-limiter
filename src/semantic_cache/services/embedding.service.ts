@@ -2,6 +2,7 @@ import OpenAI from "openai";
 import dotenv from "dotenv";
 
 dotenv.config();
+console.log("Before EmbeddingService:", !!process.env.OPENAI_API_KEY);
 
 class EmbeddingService {
     private client: OpenAI;
