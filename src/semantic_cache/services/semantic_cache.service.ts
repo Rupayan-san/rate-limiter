@@ -1,6 +1,7 @@
 import { EmbeddingService } from "./embedding.service.js";
 import { embeddingToBuffer } from "../utils/vector.utils.js";
 import { client } from "../../config/redis.config.js";
+import { CACHE_SIMILARITY_THRESHOLD } from "../config/semantic_cache.config.js";
 
 type SearchResult = {
     attributes: string[];
@@ -77,7 +78,7 @@ async function searchCacheService(query: string) {
         0,
         Math.min(1, 1 - distance)
     );
-    
+
     return {
         id: cacheEntry.id,
         query: cacheEntry.extra_attributes.query,
@@ -88,8 +89,14 @@ async function searchCacheService(query: string) {
 }
 
 
+async function thresholdCompare(similarityScore: number, threshold: number = CACHE_SIMILARITY_THRESHOLD){
+    return  similarityScore >= threshold;
+}
+
+
 export { 
     createCacheService, 
     getCacheService, 
-    searchCacheService 
+    searchCacheService,
+    thresholdCompare
 };
