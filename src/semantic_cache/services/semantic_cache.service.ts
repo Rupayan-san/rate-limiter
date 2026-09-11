@@ -3,6 +3,8 @@ import { embeddingToBuffer } from "../utils/vector.utils.js";
 import { client } from "../../config/redis.config.js";
 import crypto from "crypto";
 import { CACHE_SIMILARITY_THRESHOLD } from "../config/semantic_cache.config.js";
+import { LLMService } from "./llm.service.js";
+
 
 type SearchResult = {
     attributes: string[];
@@ -34,7 +36,6 @@ async function createCacheService(query: string, response: string) {
         embedding: embeddingBuffer,
     });
 
-    return cacheId;
 }
 
 
@@ -106,19 +107,24 @@ async function returnCache(query: string){
     const cacheEntry = await searchCacheService(query);
     
     if (cacheEntry && isCacheHit(cacheEntry.similarityScore)) {
+        console.log("cachehit");
         return cacheEntry.response;
     }
+    console.log("cachemiss");
 
-    else {
-        
-    }
-
-    return null;
+    const llmService = new LLMService();
+    const response = await llmService.askLLM(query);
+    await createCacheService(query, response);
+    return response;
 }
+
+
+
 
 export { 
     createCacheService, 
     getCacheService, 
     searchCacheService,
-    isCacheHit
+    isCacheHit,
+    returnCache
 };
