@@ -1,16 +1,12 @@
+import { client } from "../config/openai.config.js";
 import OpenAI from "openai";
-import dotenv from "dotenv";
 
-dotenv.config();
-console.log("Before EmbeddingService:", !!process.env.OPENAI_API_KEY);
 
 class EmbeddingService {
     private client: OpenAI;
 
     constructor() {
-        this.client = new OpenAI({
-            apiKey: process.env.OPENAI_API_KEY,
-        });
+        this.client = client;
     }
 
     public async generateEmbedding(text: string): Promise<number[]> {
@@ -19,7 +15,7 @@ class EmbeddingService {
             input: text,
         });
 
-        const embedding = response.data[0]?.embedding as number[] || [];
+        const embedding = response.data[0]?.embedding as number[];
         
         return embedding;
     }

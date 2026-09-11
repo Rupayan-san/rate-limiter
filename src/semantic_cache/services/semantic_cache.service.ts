@@ -1,6 +1,7 @@
 import { EmbeddingService } from "./embedding.service.js";
 import { embeddingToBuffer } from "../utils/vector.utils.js";
 import { client } from "../../config/redis.config.js";
+import crypto from "crypto";
 import { CACHE_SIMILARITY_THRESHOLD } from "../config/semantic_cache.config.js";
 
 type SearchResult = {
@@ -20,16 +21,20 @@ type SearchResult = {
 };
 
 
-async function createCacheService(cache_id: string, query: string, response: string) {
+async function createCacheService(query: string, response: string) {
+    const cacheId = crypto.randomUUID();
+    
     const embeddingService = new EmbeddingService();
     const embedding = await embeddingService.generateEmbedding(query);
     const embeddingBuffer = embeddingToBuffer(embedding);
 
-    await client.hSet(`semantic_cache:${cache_id}`, {
+    await client.hSet(`semantic_cache:${cacheId}`, {
         query,
         response,
         embedding: embeddingBuffer,
     });
+
+    return cacheId;
 }
 
 
@@ -97,6 +102,19 @@ function isCacheHit(similarityScore: number, threshold: number = CACHE_SIMILARIT
 }
 
 
+async function returnCache(query: string){
+    const cacheEntry = await searchCacheService(query);
+    
+    if (cacheEntry && isCacheHit(cacheEntry.similarityScore)) {
+        return cacheEntry.response;
+    }
+
+    else {
+        
+    }
+
+    return null;
+}
 
 export { 
     createCacheService, 
