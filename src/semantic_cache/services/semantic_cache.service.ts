@@ -71,15 +71,20 @@ async function searchCacheService(query: string) {
         return null;
     }
 
+    const distance = Number(cacheEntry.extra_attributes.vector_score);
+
+    const similarityScore = Math.max(
+        0,
+        Math.min(1, 1 - distance)
+    );
+    
     return {
         id: cacheEntry.id,
         query: cacheEntry.extra_attributes.query,
         response: cacheEntry.extra_attributes.response,
-        vectorScore: Number(cacheEntry.extra_attributes.vector_score),
+        similarityScore: similarityScore,
     };
 
-    
-    return result;
 }
 
 
