@@ -19,6 +19,7 @@ type SearchResult = {
     warning: string[];
 };
 
+
 async function createCacheService(cache_id: string, query: string, response: string) {
     const embeddingService = new EmbeddingService();
     const embedding = await embeddingService.generateEmbedding(query);
@@ -31,11 +32,13 @@ async function createCacheService(cache_id: string, query: string, response: str
     });
 }
 
+
 async function getCacheService(cache_id: string) {
 
     const cacheEntry = await client.hGetAll(`semantic_cache:${cache_id}`);
     return cacheEntry;
 }
+
 
 async function searchCacheService(query: string) {
     const embeddingService = new EmbeddingService();
@@ -89,14 +92,15 @@ async function searchCacheService(query: string) {
 }
 
 
-async function thresholdCompare(similarityScore: number, threshold: number = CACHE_SIMILARITY_THRESHOLD){
+function isCacheHit(similarityScore: number, threshold: number = CACHE_SIMILARITY_THRESHOLD){
     return  similarityScore >= threshold;
 }
+
 
 
 export { 
     createCacheService, 
     getCacheService, 
     searchCacheService,
-    thresholdCompare
+    isCacheHit
 };
