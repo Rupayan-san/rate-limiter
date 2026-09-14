@@ -103,7 +103,7 @@ function isCacheHit(similarityScore: number, threshold: number = CACHE_SIMILARIT
 }
 
 
-async function returnCache(query: string){
+async function SemanticCache(query: string){
     const cacheEntry = await searchCacheService(query);
     
     if (cacheEntry && isCacheHit(cacheEntry.similarityScore)) {
@@ -126,5 +126,5 @@ export {
     getCacheService, 
     searchCacheService,
     isCacheHit,
-    returnCache
+    SemanticCache
 };
