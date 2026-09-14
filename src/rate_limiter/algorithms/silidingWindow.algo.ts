@@ -1,9 +1,10 @@
-import type { RateLimiter } from '../rateLimiter.interface.js';
-import { client } from '../../config/redis.config.js';
+import type { RedisClientType } from "redis";
+import type { RateLimiter } from "../rateLimiter.interface.js";
 
-export class SlidingWindow implements RateLimiter {
+class SlidingWindow implements RateLimiter {
     private windowSize: number;
     private maxRequests: number;
+    private client: RedisClientType;
 
     private readonly script = `
         local now = tonumber(ARGV[1])
@@ -32,9 +33,10 @@ export class SlidingWindow implements RateLimiter {
 
         return 0
     `
-    constructor(windowSize: number, maxRequests: number) {
+    constructor(windowSize: number, maxRequests: number, client: RedisClientType) {
         this.windowSize = windowSize;
         this.maxRequests = maxRequests;
+        this.client = client;
     }
 
 
@@ -46,7 +48,7 @@ export class SlidingWindow implements RateLimiter {
 
 
     async runScript(userId: string, requestId: string): Promise<number> {
-        const result = await client.eval(this.script, {
+        const result = await this.client.eval(this.script, {
             keys: [`sliding_window:${userId}`],
             arguments: [
                 String(Date.now()),
@@ -58,4 +60,8 @@ export class SlidingWindow implements RateLimiter {
         return result as number;
     } 
 
+}
+
+export{
+    SlidingWindow,
 }

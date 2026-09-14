@@ -1,6 +1,6 @@
 import { EmbeddingService } from "./embedding.service.js";
 import { embeddingToBuffer } from "../utils/vector.utils.js";
-import { client } from "../../config/redis.config.js";
+import type { RedisClientType } from "redis";
 import crypto from "crypto";
 import { CACHE_SIMILARITY_THRESHOLD } from "../config/semantic_cache.config.js";
 import { LLMService } from "./llm.service.js";
@@ -23,7 +23,7 @@ type SearchResult = {
 };
 
 
-async function createCacheService(query: string, response: string) {
+async function createCacheService(query: string, response: string, client: RedisClientType) {
     const cacheId = crypto.randomUUID();
     
     const embeddingService = new EmbeddingService();
@@ -39,14 +39,14 @@ async function createCacheService(query: string, response: string) {
 }
 
 
-async function getCacheService(cache_id: string) {
+async function getCacheService(cache_id: string, client: RedisClientType) {
 
     const cacheEntry = await client.hGetAll(`semantic_cache:${cache_id}`);
     return cacheEntry;
 }
 
 
-async function searchCacheService(query: string) {
+async function searchCacheService(query: string, client: RedisClientType) {
     const embeddingService = new EmbeddingService();
     const embedding = await embeddingService.generateEmbedding(query);
     const embeddingBuffer = embeddingToBuffer(embedding);
@@ -103,8 +103,8 @@ function isCacheHit(similarityScore: number, threshold: number = CACHE_SIMILARIT
 }
 
 
-async function SemanticCache(query: string){
-    const cacheEntry = await searchCacheService(query);
+async function SemanticCache(query: string, client: RedisClientType){
+    const cacheEntry = await searchCacheService(query, client);
     
     if (cacheEntry && isCacheHit(cacheEntry.similarityScore)) {
         console.log("cachehit");
@@ -114,7 +114,7 @@ async function SemanticCache(query: string){
 
     const llmService = new LLMService();
     const response = await llmService.askLLM(query);
-    await createCacheService(query, response);
+    await createCacheService(query, response, client);
     return response;
 }
 

@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { LeakyBucket } from '../algorithms/leakyBucket.algo.js';
+import { client } from './setup.js';
 
 describe('LeakyBucket', () => {
   it('should allow requests when bucket has capacity', async () => {
-    const bucket = new LeakyBucket(5, 1); 
+    const bucket = new LeakyBucket(5, 1, client); 
     const userId = `test-${Date.now()}`;
     const result = await bucket.allowRequest(userId);
     expect(result).toBe(true);
@@ -11,7 +12,7 @@ describe('LeakyBucket', () => {
 
 
   it('should reject requests when bucket is full', async () => {
-    const bucket = new LeakyBucket(1, 0);
+    const bucket = new LeakyBucket(1, 0, client);
     const userId = `test-${Date.now()}`;
     const firstRequest = await bucket.allowRequest(userId);
     expect(firstRequest).toBe(true);
@@ -22,7 +23,7 @@ describe('LeakyBucket', () => {
 
 
   it('should allow requests after requests leak from the bucket', async () => {
-    const bucket = new LeakyBucket(1, 1);
+    const bucket = new LeakyBucket(1, 1, client);
     const userId = `test-${Date.now()}`;
 
     const firstRequest = await bucket.allowRequest(userId);
@@ -40,7 +41,7 @@ describe('LeakyBucket', () => {
 
 
   it('should maintain independent buckets for different users', async () => {
-    const bucket = new LeakyBucket(1, 1);
+    const bucket = new LeakyBucket(1, 1, client);
     const userId1 = `user1-${Date.now()}`;
     const userId2 = `user2-${Date.now()}`;
 
@@ -59,7 +60,7 @@ describe('LeakyBucket', () => {
 
 
   it('should not exceed bucket capacity', async () => {
-    const bucket = new LeakyBucket(2, 1);
+    const bucket = new LeakyBucket(2, 1, client);
     const userId = `test-${Date.now()}`;
     
     const firstRequest = await bucket.allowRequest(userId);
@@ -83,7 +84,7 @@ describe('LeakyBucket', () => {
 
   
   it('should not exceed capacity with concurrent requests', async () => {
-    const bucket = new LeakyBucket(5, 0);
+    const bucket = new LeakyBucket(5, 0, client);
     const userId = `concurrent-${Date.now()}`;
 
     const results = await Promise.all(

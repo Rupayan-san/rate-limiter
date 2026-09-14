@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { TokenBucket } from '../algorithms/tokenBucket.algo.js';
+import { client } from './setup.js';
+
 
 describe('TokenBucket', () => {
   it('should allow requests when tokens are available', async () => {
-    const bucket = new TokenBucket(5, 1); // 5 tokens, refill rate of 1 token per second
+    const bucket = new TokenBucket(5, 1, client); // 5 tokens, refill rate of 1 token per second
     const userId = `test-${Date.now()}`;
     const result = await bucket.allowRequest(userId);
     expect(result).toBe(true);
@@ -11,7 +13,7 @@ describe('TokenBucket', () => {
 
 
   it('should deny requests when tokens are not available', async () => {
-    const bucket = new TokenBucket(1, 0);
+    const bucket = new TokenBucket(1, 0, client);
     const userId = `test-${Date.now()}`;
     const firstRequest = await bucket.allowRequest(userId);
     expect(firstRequest).toBe(true);
@@ -22,7 +24,7 @@ describe('TokenBucket', () => {
 
 
   it('should deny requests when tokens are not available and then allow after refill', async () => {
-    const bucket = new TokenBucket(1, 1);
+    const bucket = new TokenBucket(1, 1, client);
     const userId = `test-${Date.now()}`;
 
     const firstRequest = await bucket.allowRequest(userId);
@@ -40,7 +42,7 @@ describe('TokenBucket', () => {
 
 
   it('should handle multiple users independently with unique buckets', async () => {
-    const bucket = new TokenBucket(1, 1);
+    const bucket = new TokenBucket(1, 1, client);
     const userId1 = `user1-${Date.now()}`;
     const userId2 = `user2-${Date.now()}`;
 
@@ -59,7 +61,7 @@ describe('TokenBucket', () => {
 
 
   it('should not fill tokens beyond capacity', async () => {
-    const bucket = new TokenBucket(2, 1);
+    const bucket = new TokenBucket(2, 1, client);
     const userId = `test-${Date.now()}`;
     
     const firstRequest = await bucket.allowRequest(userId);
@@ -83,7 +85,7 @@ describe('TokenBucket', () => {
 
 
   it('should not exceed capacity with concurrent requests', async () => {
-    const bucket = new TokenBucket(5, 0);
+    const bucket = new TokenBucket(5, 0, client);
     const userId = `concurrent-${Date.now()}`;
 
     const results = await Promise.all(

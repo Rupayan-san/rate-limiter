@@ -1,9 +1,10 @@
-import { client } from "../../config/redis.config.js";
+import type { RedisClientType } from "redis";
 import type { RateLimiter } from "../rateLimiter.interface.js";
 
 class LeakyBucket implements RateLimiter {
     private capacity: number;
     private leakRate: number;
+    private client: RedisClientType;
 
     private readonly script = `
         local capacity = tonumber(ARGV[1])
@@ -49,9 +50,10 @@ class LeakyBucket implements RateLimiter {
         return allowed
     `;
 
-    constructor(capacity: number, leakRate: number) {
+    constructor(capacity: number, leakRate: number, client: RedisClientType) {
         this.capacity = capacity;
         this.leakRate = leakRate;
+        this.client = client;
     }
 
     async allowRequest(userId: string): Promise<boolean> {
@@ -65,7 +67,7 @@ class LeakyBucket implements RateLimiter {
 
 
     async runScript(userId: string) {
-        const result = await client.eval(this.script, {
+        const result = await this.client.eval(this.script, {
             keys: [`leaky_bucket:${userId}`],
             arguments: [
                 String(this.capacity),

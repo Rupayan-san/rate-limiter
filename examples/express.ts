@@ -6,15 +6,16 @@ import { LeakyBucket } from '../src/rate_limiter/algorithms/leakyBucket.algo.js'
 import { SlidingWindow } from '../src/rate_limiter/algorithms/silidingWindow.algo.js'
 import { EmbeddingService } from '../src/semantic_cache/services/embedding.service.js';
 import { cosineSimilarity } from '../src/semantic_cache/utils/similarity.utils.js';
+import { client } from './config/redis.config.js';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const tokenBucket = new TokenBucket(3, 0.1); // capacity of 3 tokens, refill rate of 1 token per 10 seconds
-const leakyBucket = new LeakyBucket(3, 0.1); // capacity of 3 requests, leak rate of 1 request per 10 seconds
-const slidingWindow = new SlidingWindow(10, 3) // capacity of 3 requests, window size of 10 second
+const tokenBucket = new TokenBucket(3, 0.1, client); // capacity of 3 tokens, refill rate of 1 token per 10 seconds
+const leakyBucket = new LeakyBucket(3, 0.1, client); // capacity of 3 requests, leak rate of 1 request per 10 seconds
+const slidingWindow = new SlidingWindow(10, 3, client) // capacity of 3 requests, window size of 10 second
 
 
 app.get('/token-bucket/:userId', rateLimitMiddleware(tokenBucket), (req, res) => {

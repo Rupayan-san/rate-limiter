@@ -1,9 +1,10 @@
-import { client } from "../../config/redis.config.js";
+import type { RedisClientType } from "redis";
 import type { RateLimiter } from "../rateLimiter.interface.js";
 
 class TokenBucket implements RateLimiter {
     private capacity: number;
     private refillRate: number;
+    private client: RedisClientType;
     private readonly script = `
         local now = tonumber(ARGV[3])
         local capacity = tonumber(ARGV[1])
@@ -63,9 +64,10 @@ class TokenBucket implements RateLimiter {
         return 0
     `;
 
-    constructor(capacity: number, refillRate: number) {
+    constructor(capacity: number, refillRate: number, client: RedisClientType) {
         this.capacity = capacity;
         this.refillRate = refillRate;
+        this.client = client;
     }
 
     async allowRequest(userId: string): Promise<boolean> {
@@ -78,7 +80,7 @@ class TokenBucket implements RateLimiter {
     }
 
     async runScript(userId: string) {
-        const result = await client.eval(this.script, {
+        const result = await this.client.eval(this.script, {
             keys: [`token_bucket:${userId}`],
             arguments: [
                 String(this.capacity),

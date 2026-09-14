@@ -1,9 +1,11 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { SlidingWindow } from '../algorithms/silidingWindow.algo.js';
+import { client } from './setup.js';
+
 
 describe('SlidingWindow', () => {
     it('should allow requests when under the limit', async () => {
-        const slidingWindow = new SlidingWindow(10, 3);
+        const slidingWindow = new SlidingWindow(10, 3, client);
         const userId = `test-${Date.now()}`;
 
         const first = await slidingWindow.allowRequest(userId);
@@ -17,7 +19,7 @@ describe('SlidingWindow', () => {
 
 
     it('should reject requests when the limit is reached', async () => {
-        const slidingWindow = new SlidingWindow(10, 3);
+        const slidingWindow = new SlidingWindow(10, 3, client);
         const userId = `test-${Date.now()}`;
 
         await slidingWindow.allowRequest(userId);
@@ -31,7 +33,7 @@ describe('SlidingWindow', () => {
 
 
     it('should allow requests after the window expires', async () => {
-        const slidingWindow = new SlidingWindow(1, 2);
+        const slidingWindow = new SlidingWindow(1, 2, client);
         const userId = `test-${Date.now()}`;
 
         const first = await slidingWindow.allowRequest(userId);
@@ -53,7 +55,7 @@ describe('SlidingWindow', () => {
 
 
     it('should maintain independent windows for different users', async () => {
-        const slidingWindow = new SlidingWindow(10, 2);
+        const slidingWindow = new SlidingWindow(10, 2, client);
 
         const user1 = `user1-${Date.now()}`;
         const user2 = `user2-${Date.now()}`;
@@ -70,7 +72,7 @@ describe('SlidingWindow', () => {
 
 
     it('should not exceed the limit with concurrent requests', async () => {
-        const slidingWindow = new SlidingWindow(10, 5);
+        const slidingWindow = new SlidingWindow(10, 5, client);
         const userId = `concurrent-${Date.now()}`;
 
         const results = await Promise.all(

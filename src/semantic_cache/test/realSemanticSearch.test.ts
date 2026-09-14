@@ -1,9 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { returnCache } from "../services/semantic_cache.service.js";
+import { SemanticCache } from "../services/semantic_cache.service.js";
+import { client } from "../../rate_limiter/test/setup.js";
 
 describe("Real Semantic Search", () => {
     it("should return a cache miss", async () => {
-        const cacheMiss = await returnCache("What is the capital of usa?");
+        const cacheMiss = await SemanticCache("What is the capital of usa?", client);
         console.log(cacheMiss);
         expect(cacheMiss).toBeTruthy();
         expect(typeof cacheMiss).toBe("string");
@@ -11,7 +12,7 @@ describe("Real Semantic Search", () => {
 
 
     it("should return a cache hit", async () => {
-        const cacheHit = await returnCache("what is the name of capital of usa");
+        const cacheHit = await SemanticCache("what is the name of capital of usa", client);
         console.log(cacheHit);
         expect(cacheHit).toBeTruthy();
         expect(typeof cacheHit).toBe("string");
