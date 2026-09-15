@@ -1,8 +1,9 @@
 import { client } from "../config/openai.config.js";
 import OpenAI from "openai";
+import type { LLMProvider } from "../../interfaces/llm.interface.js";
 
 
-class LLMService {
+class LLMService implements LLMProvider {
     private client: OpenAI;
 
     constructor() {

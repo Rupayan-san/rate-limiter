@@ -1,9 +1,12 @@
-import { EmbeddingService } from "./embedding.service.js";
 import { embeddingToBuffer } from "../utils/vector.utils.js";
 import type { RedisClientType } from "redis";
 import crypto from "crypto";
 import { CACHE_SIMILARITY_THRESHOLD } from "../config/semantic_cache.config.js";
 import { LLMService } from "./llm.service.js";
+import type { LLMProvider } from "../../interfaces/llm.interface.js";
+import type { EmbeddingProvider } from "../../interfaces/embedding.interface.js";
+import { EmbeddingService } from "./embedding.service.js";
+
 
 
 type SearchResult = {
@@ -23,10 +26,13 @@ type SearchResult = {
 };
 
 
-async function createCacheService(query: string, response: string, client: RedisClientType) {
+async function createCacheService(query: string,
+    response: string, 
+    client: RedisClientType,
+    embeddingService: EmbeddingProvider
+) {
     const cacheId = crypto.randomUUID();
     
-    const embeddingService = new EmbeddingService();
     const embedding = await embeddingService.generateEmbedding(query);
     const embeddingBuffer = embeddingToBuffer(embedding);
 
@@ -46,8 +52,10 @@ async function getCacheService(cache_id: string, client: RedisClientType) {
 }
 
 
-async function searchCacheService(query: string, client: RedisClientType) {
-    const embeddingService = new EmbeddingService();
+async function searchCacheService(query: string, 
+    client: RedisClientType,
+    embeddingService: EmbeddingProvider
+) {
     const embedding = await embeddingService.generateEmbedding(query);
     const embeddingBuffer = embeddingToBuffer(embedding);
 
@@ -103,8 +111,12 @@ function isCacheHit(similarityScore: number, threshold: number = CACHE_SIMILARIT
 }
 
 
-async function SemanticCache(query: string, client: RedisClientType){
-    const cacheEntry = await searchCacheService(query, client);
+async function SemanticCache(query: string,
+    client: RedisClientType,
+    llm: LLMProvider,
+    embeddingService: EmbeddingProvider,
+) {
+    const cacheEntry = await searchCacheService(query, client, embeddingService);
     
     if (cacheEntry && isCacheHit(cacheEntry.similarityScore)) {
         console.log("cachehit");
@@ -114,7 +126,7 @@ async function SemanticCache(query: string, client: RedisClientType){
 
     const llmService = new LLMService();
     const response = await llmService.askLLM(query);
-    await createCacheService(query, response, client);
+    await createCacheService(query, response, client, embeddingService);
     return response;
 }
 

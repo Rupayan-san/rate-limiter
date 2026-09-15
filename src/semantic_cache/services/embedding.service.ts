@@ -1,8 +1,9 @@
 import { client } from "../config/openai.config.js";
 import OpenAI from "openai";
+import type { EmbeddingProvider } from "../../interfaces/embedding.interface.js";
 
 
-class EmbeddingService {
+class EmbeddingService implements EmbeddingProvider {
     private client: OpenAI;
 
     constructor() {
