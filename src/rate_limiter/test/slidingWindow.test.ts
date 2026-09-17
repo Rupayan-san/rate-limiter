@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { SlidingWindow } from '../algorithms/silidingWindow.algo.js';
+import { SlidingWindow } from '../algorithms/slidingWindow.algo.js';
 import { client } from './setup.js';
 
 

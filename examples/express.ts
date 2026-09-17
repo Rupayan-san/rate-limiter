@@ -1,9 +1,9 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import { rateLimitMiddleware  } from '../src/middlewares/rate-limiter.middleware.js';
+import { rateLimitMiddleware } from '../src/middlewares/rate-limiter.middleware.js';
 import { TokenBucket } from '../src/rate_limiter/algorithms/tokenBucket.algo.js';
 import { LeakyBucket } from '../src/rate_limiter/algorithms/leakyBucket.algo.js';
-import { SlidingWindow } from '../src/rate_limiter/algorithms/silidingWindow.algo.js'
+import { SlidingWindow } from '../src/rate_limiter/algorithms/slidingWindow.algo.js'
 import { EmbeddingService } from '../src/semantic_cache/services/embedding.service.js';
 import { cosineSimilarity } from '../src/semantic_cache/utils/similarity.utils.js';
 import { client } from './config/redis.config.js';
