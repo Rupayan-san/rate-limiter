@@ -5,8 +5,30 @@ import { CACHE_SIMILARITY_THRESHOLD } from "../config/semantic_cache.config.js";
 import { LLMService } from "./llm.service.js";
 import type { LLMProvider } from "../../interfaces/llm.interface.js";
 import type { EmbeddingProvider } from "../../interfaces/embedding.interface.js";
-import { EmbeddingService } from "./embedding.service.js";
+import type { EmbeddingService } from "./embedding.service.js";
 
+
+
+type SemanticCacheOptions = {
+    client: RedisClientType;
+    embeddingService: EmbeddingProvider;
+    llmService: LLMProvider;
+    threshold?: number;
+};
+
+class SemanticCache {
+    private client: RedisClientType;
+    private embeddingService: EmbeddingProvider;
+    private llmService: LLMProvider;
+    private threshold: number;
+
+    constructor(options: SemanticCacheOptions) {
+        this.client = options.client;
+        this.embeddingService = options.embeddingService;
+        this.llmService = options.llmService;
+        this.threshold = options.threshold ?? CACHE_SIMILARITY_THRESHOLD;
+    }
+}
 
 
 type SearchResult = {
@@ -111,7 +133,7 @@ function isCacheHit(similarityScore: number, threshold: number = CACHE_SIMILARIT
 }
 
 
-async function SemanticCache(query: string,
+async function getCachedOrGenerate(query: string,
     client: RedisClientType,
     llm: LLMProvider,
     embeddingService: EmbeddingProvider,
@@ -124,8 +146,7 @@ async function SemanticCache(query: string,
     }
     console.log("cachemiss");
 
-    const llmService = new LLMService();
-    const response = await llmService.askLLM(query);
+    const response = await llm.askLLM(query);
     await createCacheService(query, response, client, embeddingService);
     return response;
 }
@@ -138,5 +159,5 @@ export {
     getCacheService, 
     searchCacheService,
     isCacheHit,
-    SemanticCache
+    getCachedOrGenerate
 };
