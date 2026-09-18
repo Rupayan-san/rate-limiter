@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { SemanticCache } from "../services/semantic_cache.service.js";
+import { SemanticCache } from "../../src/semantic_cache/services/semantic_cache.service.js";
 import { client } from "../../rate_limiter/test/setup.js";
 
 describe("Real Semantic Search", () => {

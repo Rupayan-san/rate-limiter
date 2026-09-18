@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cosineSimilarity } from "../utils/similarity.utils.js";
+import { cosineSimilarity } from "../../src/semantic_cache/utils/similarity.utils.js";
 
 describe("cosineSimilarity", () => {
     it("should return 1 for identical vectors", () => {
@@ -10,7 +10,7 @@ describe("cosineSimilarity", () => {
 
         expect(result).toBeCloseTo(1);
     });
-    
+
 
     it("should return 0 for orthogonal vectors", () => {
         const a = [1, 0];

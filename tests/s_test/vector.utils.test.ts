@@ -1,4 +1,4 @@
-import { embeddingToBuffer } from "../utils/vector.utils.js";
+import { embeddingToBuffer } from "../../src/semantic_cache/utils/vector.utils.js";
 import { describe, it, expect } from "vitest";
 
 describe("Vector Utils Tests", () => {

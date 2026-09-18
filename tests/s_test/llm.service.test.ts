@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { LLMService } from "../services/llm.service.js";
+import { LLMService } from "../../src/semantic_cache/services/llm.service.js";
 
 
 describe("LLMService", () => {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { isCacheHit } from "../services/semantic_cache.service.js";
+import { isCacheHit } from "../../src/semantic_cache/services/semantic_cache.service.js";
 
 describe("isCacheHit", () => {
     it("should return true if cache hit", () => {

@@ -1,4 +1,4 @@
-import { createCacheService, getCacheService, searchCacheService } from "../services/semantic_cache.service.js";
+import { createCacheService, getCacheService, searchCacheService } from "../../src/semantic_cache/services/semantic_cache.service.js";
 import { describe, it, expect } from "vitest";
 import { client } from "../../rate_limiter/test/setup.js";
 
