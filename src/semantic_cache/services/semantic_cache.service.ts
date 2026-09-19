@@ -9,8 +9,8 @@ import type { EmbeddingProvider } from "../../interfaces/embedding.interface.js"
 
 type SemanticCacheOptions = {
     client: RedisClientType;
-    embeddingService: EmbeddingProvider;
-    llmService: LLMProvider;
+    embeddingProvider: EmbeddingProvider;
+    llmProvider: LLMProvider;
     threshold?: number;
 };
 
@@ -32,29 +32,27 @@ type SearchResult = {
 
 class SemanticCache {
     private client: RedisClientType;
-    private embeddingService: EmbeddingProvider;
-    private llmService: LLMProvider;
+    private embeddingProvider: EmbeddingProvider;
+    private llmProvider: LLMProvider;
     private threshold: number;
 
     constructor(options: SemanticCacheOptions) {
         this.client = options.client;
-        this.embeddingService = options.embeddingService;
-        this.llmService = options.llmService;
+        this.embeddingProvider = options.embeddingProvider;
+        this.llmProvider = options.llmProvider;
         this.threshold = options.threshold ?? CACHE_SIMILARITY_THRESHOLD;
     }
 
     private async createCacheService(
         query: string,
         response: string, 
-        client: RedisClientType,
-        embeddingService: EmbeddingProvider
     ) {
         const cacheId = crypto.randomUUID();
         
-        const embedding = await embeddingService.generateEmbedding(query);
+        const embedding = await this.embeddingProvider.generateEmbedding(query);
         const embeddingBuffer = embeddingToBuffer(embedding);
 
-        await client.hSet(`semantic_cache:${cacheId}`, {
+        await this.client.hSet(`semantic_cache:${cacheId}`, {
             query,
             response,
             embedding: embeddingBuffer,
@@ -66,15 +64,11 @@ class SemanticCache {
         return cacheEntry;
     }
 
-    private async searchCacheService(
-        query: string, 
-        client: RedisClientType,
-        embeddingService: EmbeddingProvider
-    ) {
-        const embedding = await embeddingService.generateEmbedding(query);
+    private async searchCacheService(query: string) {
+        const embedding = await this.embeddingProvider.generateEmbedding(query);
         const embeddingBuffer = embeddingToBuffer(embedding);
         
-        const result = await client.sendCommand([
+        const result = await this.client.sendCommand([
             "FT.SEARCH",
             "semantic_cache_idx",
             "*=>[KNN 1 @embedding $query_vector AS vector_score]",
@@ -118,17 +112,12 @@ class SemanticCache {
         };
     }
 
-    private isCacheHit(similarityScore: number, threshold: number = CACHE_SIMILARITY_THRESHOLD) {
-        return similarityScore >= threshold;
+    private isCacheHit(similarityScore: number) {
+        return similarityScore >= this.threshold;
     }
 
-    public async getCachedOrGenerate(
-        query: string,
-        client: RedisClientType,
-        llm: LLMProvider,
-        embeddingService: EmbeddingProvider,
-    ) {
-        const cacheEntry = await this.searchCacheService(query, client, embeddingService);
+    public async getCachedOrGenerate(query: string) {
+        const cacheEntry = await this.searchCacheService(query);
         
         if (cacheEntry && this.isCacheHit(cacheEntry.similarityScore)) {
             console.log("cachehit");
@@ -136,8 +125,8 @@ class SemanticCache {
         }
         console.log("cachemiss");
         
-        const response = await llm.askLLM(query);
-        await this.createCacheService(query, response, client, embeddingService);
+        const response = await this.llmProvider.askLLM(query);
+        await this.createCacheService(query, response);
         return response;
     }
 }

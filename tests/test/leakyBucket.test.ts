@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { LeakyBucket } from '../algorithms/leakyBucket.algo.js';
+import { LeakyBucket } from '../../src/rate_limiter/algorithms/leakyBucket.algo.js';
 import { client } from './setup.js';
 
 describe('LeakyBucket', () => {
