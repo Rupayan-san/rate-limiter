@@ -11,21 +11,24 @@ Redis-based rate limiting and semantic caching for Node.js applications.
 * Semantic caching for LLM responses
 * Pluggable LLM and embedding providers
 * TypeScript support
+* ESM support
 
 ## Installation
 
 ```bash
-npm install request-guard
+npm install @rupayan-das/request-guard redis
 ```
 
 Make sure Redis is running and accessible from your application.
+
+Semantic caching requires Redis with vector search support.
 
 ## Rate Limiting
 
 ### Using the Factory
 
 ```ts
-import { createRateLimiter } from "request-guard";
+import { createRateLimiter } from "@rupayan-das/request-guard";
 import { createClient } from "redis";
 
 const client = createClient({
@@ -46,9 +49,11 @@ const allowed = await rateLimiter.allowRequest("user-123");
 console.log(allowed);
 ```
 
-### Available Algorithms
+`allowRequest()` returns `true` when the request is allowed and `false` when the rate limit has been exceeded.
 
-#### Token Bucket
+## Available Algorithms
+
+### Token Bucket
 
 ```ts
 const rateLimiter = createRateLimiter({
@@ -59,7 +64,10 @@ const rateLimiter = createRateLimiter({
 });
 ```
 
-#### Leaky Bucket
+* `capacity`: Maximum number of tokens in the bucket.
+* `refillRate`: Number of tokens added per second.
+
+### Leaky Bucket
 
 ```ts
 const rateLimiter = createRateLimiter({
@@ -70,7 +78,10 @@ const rateLimiter = createRateLimiter({
 });
 ```
 
-#### Sliding Window
+* `capacity`: Maximum bucket capacity.
+* `leakRate`: Number of requests processed per second.
+
+### Sliding Window
 
 ```ts
 const rateLimiter = createRateLimiter({
@@ -81,14 +92,15 @@ const rateLimiter = createRateLimiter({
 });
 ```
 
-`windowSize` is specified in seconds.
+* `windowSize`: Window duration in seconds.
+* `maxRequests`: Maximum number of requests allowed within the window.
 
 ## Semantic Cache
 
 Semantic caching uses embeddings to determine whether a new query is sufficiently similar to a previously cached query.
 
 ```ts
-import { SemanticCache } from "request-guard";
+import { SemanticCache } from "@rupayan-das/request-guard";
 
 const cache = new SemanticCache({
   client,
@@ -97,18 +109,24 @@ const cache = new SemanticCache({
   threshold: 0.6,
 });
 
-const response = await cache.getCachedOrGenerate(
+const response = await cache.getOrGenerate(
   "Explain how Redis works"
 );
+
+console.log(response);
 ```
 
-If a sufficiently similar query exists in the cache, its response is returned instead of generating a new LLM response.
+If a sufficiently similar query exists in the cache, its cached response is returned instead of generating a new LLM response.
 
 The default similarity threshold is `0.6`.
 
+A higher threshold requires queries to be more similar to produce a cache hit. A lower threshold allows more loosely related queries to use cached responses.
+
 ## Providers
 
-The semantic cache does not depend on a specific AI provider. You provide implementations of the `EmbeddingProvider` and `LLMProvider` interfaces.
+The semantic cache does not depend on a specific AI provider.
+
+You provide implementations of the `EmbeddingProvider` and `LLMProvider` interfaces.
 
 ### Embedding Provider
 
@@ -122,18 +140,20 @@ interface EmbeddingProvider {
 
 ```ts
 interface LLMProvider {
-  generateResponse(prompt: string): Promise<string>;
+  askLLM(prompt: string): Promise<string>;
 }
 ```
 
-This allows the cache to work with different LLM and embedding providers.
+This allows the semantic cache to work with different LLM and embedding providers.
+
+For example, you can implement these interfaces using OpenAI, Anthropic, Gemini, a local model, or another provider.
 
 ## Direct Algorithm Usage
 
-The individual algorithms can also be instantiated directly:
+The individual rate limiting algorithms can also be instantiated directly.
 
 ```ts
-import { TokenBucket } from "rate-limiter";
+import { TokenBucket } from "@rupayan-das/request-guard";
 
 const limiter = new TokenBucket(
   10,
@@ -142,7 +162,11 @@ const limiter = new TokenBucket(
 );
 
 const allowed = await limiter.allowRequest("user-123");
+
+console.log(allowed);
 ```
+
+The same approach can be used with `LeakyBucket` and `SlidingWindow`.
 
 ## API
 
@@ -156,9 +180,16 @@ Creates a rate limiter using one of the supported algorithms:
 
 ### `SemanticCache(options)`
 
-Creates a semantic cache using the supplied Redis client, embedding provider, and LLM provider.
+Creates a semantic cache using:
+
+* A Redis client
+* An embedding provider
+* An LLM provider
+* An optional similarity threshold
 
 ### `allowRequest(userId)`
+
+Checks whether a request should be allowed for the specified user.
 
 Returns:
 
@@ -166,7 +197,35 @@ Returns:
 Promise<boolean>
 ```
 
-`true` means the request is allowed. `false` means the request has exceeded the configured limit.
+* `true`: Request is allowed.
+* `false`: Rate limit has been exceeded.
+
+### `getOrGenerate(query)`
+
+Checks the semantic cache for a sufficiently similar query.
+
+* Returns the cached response on a cache hit.
+* Calls the configured LLM provider on a cache miss.
+* Stores the generated response in the semantic cache.
+
+Returns:
+
+```ts
+Promise<string>
+```
+
+## Redis
+
+The rate limiter uses Redis to store rate limiting state.
+
+The semantic cache uses Redis to store cached queries, responses, and embeddings and to perform vector similarity searches.
+
+Make sure your Redis instance is accessible from your Node.js application.
+
+## Requirements
+
+* Node.js `>= 20`
+* Redis with vector search support for semantic caching
 
 ## License
 
