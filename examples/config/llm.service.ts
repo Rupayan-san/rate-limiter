@@ -1,4 +1,4 @@
-import { client } from "../../../examples/config/openai.config.js";
+import { client } from "./config/openai.config.js";
 import OpenAI from "openai";
 import type { LLMProvider } from "../../interfaces/llm.interface.js";
 
