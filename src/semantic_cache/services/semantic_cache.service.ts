@@ -2,10 +2,8 @@ import { embeddingToBuffer } from "../utils/vector.utils.js";
 import type { RedisClientType } from "redis";
 import crypto from "crypto";
 import { CACHE_SIMILARITY_THRESHOLD } from "../config/semantic_cache.config.js";
-import { LLMService } from "./llm.service.js";
 import type { LLMProvider } from "../../interfaces/llm.interface.js";
 import type { EmbeddingProvider } from "../../interfaces/embedding.interface.js";
-import type { EmbeddingService } from "./embedding.service.js";
 
 
 
