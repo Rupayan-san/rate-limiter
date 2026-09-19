@@ -1,7 +1,6 @@
-import { client } from "../config/openai.config.js";
 import OpenAI from "openai";
-import type { EmbeddingProvider } from "../../interfaces/embedding.interface.js";
-
+import type { EmbeddingProvider } from "../../src/interfaces/embedding.interface.js";
+import { client } from "./openai.config.js"
 
 class EmbeddingService implements EmbeddingProvider {
     private client: OpenAI;
@@ -17,7 +16,7 @@ class EmbeddingService implements EmbeddingProvider {
         });
 
         const embedding = response.data[0]?.embedding as number[];
-        
+
         return embedding;
     }
 }

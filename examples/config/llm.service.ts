@@ -1,4 +1,4 @@
-import { client } from "../config/openai.config.js";
+import { client } from "../../../examples/config/openai.config.js";
 import OpenAI from "openai";
 import type { LLMProvider } from "../../interfaces/llm.interface.js";
 
@@ -10,7 +10,7 @@ class LLMService implements LLMProvider {
         this.client = client;
     }
 
-    public async askLLM(query: string): Promise<string>  {
+    public async askLLM(query: string): Promise<string> {
         const response = await this.client.chat.completions.create({
             model: "gpt-5-mini",
             messages: [
